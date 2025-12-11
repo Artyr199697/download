@@ -12,6 +12,9 @@ from tkinter import filedialog, messagebox, ttk
 from pathlib import Path
 from threading import Thread
 
+# Путь к ffmpeg (измени если у тебя другой путь)
+FFMPEG_PATH = r"C:\Program Files\Virtual Desktop Streamer\ffmpeg.exe"
+
 
 class AudioExtractor:
     def __init__(self):
@@ -150,6 +153,10 @@ class AudioExtractor:
 
     def check_ffmpeg(self):
         """Проверка наличия ffmpeg"""
+        # Сначала проверяем указанный путь
+        if os.path.exists(FFMPEG_PATH):
+            return True
+        # Потом проверяем в PATH
         try:
             subprocess.run(["ffmpeg", "-version"],
                           capture_output=True, check=True)
@@ -157,10 +164,16 @@ class AudioExtractor:
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
 
+    def get_ffmpeg_cmd(self):
+        """Получить команду ffmpeg"""
+        if os.path.exists(FFMPEG_PATH):
+            return FFMPEG_PATH
+        return "ffmpeg"
+
     def extract_audio(self, input_file, output_file):
         """Извлечение аудио из видео файла"""
         cmd = [
-            "ffmpeg",
+            self.get_ffmpeg_cmd(),
             "-i", str(input_file),
             "-vn",  # Без видео
             "-acodec", "libmp3lame",  # Кодек MP3
